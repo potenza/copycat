@@ -9,16 +9,12 @@ class CopycatTranslationsController < ActionController::Base
     query = CopycatTranslation
     query = query.where(locale: params[:locale]) unless params[:locale].blank?
 
-    if params.has_key?(:search)
-      if params[:search].blank?
-        @copycat_translations = query.all
-      else
-        key_like = CopycatTranslation.arel_table[:key].matches("%#{params[:search]}%")
-        value_like = CopycatTranslation.arel_table[:value].matches("%#{params[:search]}%")
-        @copycat_translations = query.where(key_like.or(value_like))
-      end
+    if params[:search].present?
+      key_like = CopycatTranslation.arel_table[:key].matches("%#{params[:search]}%")
+      value_like = CopycatTranslation.arel_table[:value].matches("%#{params[:search]}%")
+      @copycat_translations = query.where(key_like.or(value_like))
     else
-      @copycat_translations = []
+      @copycat_translations = query.all
     end
     @locale_names = CopycatTranslation.find(:all, select: 'distinct locale').map(&:locale)
   end
